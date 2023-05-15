@@ -18,16 +18,17 @@ model Author {
 }
 
 model Book {
-  id        String   @id @default(uuid())
-  title     String   @unique
-  rating    Int
-  price     Int
+  id     String @id @default(uuid())
+  title  String @unique
+  rating Int
+  price  Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author    Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId  String
+  author      Author        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String
+  UserOnBooks UserOnBooks[]
 }
 
 enum Role {
@@ -36,15 +37,25 @@ enum Role {
 }
 
 model User {
-  id       String    @id @default(uuid())
-  email    String    @unique
-  role     Role      @default(USER)
-  password Password?
+  id          String        @id @default(uuid())
+  email       String        @unique
+  role        Role          @default(USER)
+  password    Password?
+  UserOnBooks UserOnBooks[]
 }
 
 model Password {
-  id       String @id @default(uuid())
+  id             String @id @default(uuid())
   hashedPassword String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String @unique
+}
+
+model UserOnBooks {
+  book   Book   @relation(fields: [bookId], references: [id])
+  bookId String // relation scalar field (used in the `@relation` attribute above)
+  user   User   @relation(fields: [userId], references: [id])
+  userId String // relation scalar field (used in the `@relation` attribute above)
+
+  @@id([bookId, userId])
 }
