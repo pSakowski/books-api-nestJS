@@ -1,11 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    return true;
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    return request.user.role === Role.ADMIN;
   }
 }
