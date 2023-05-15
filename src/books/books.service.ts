@@ -1,9 +1,10 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Book } from '@prisma/client';
+import { Book, Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookDTO } from './dtos/create-book.dtos';
 
@@ -66,5 +67,27 @@ export class BooksService {
     return this.prismaService.book.delete({
       where: { id },
     });
+  }
+
+  public async likeBook(bookId: Book['id'], userId: User['id']): Promise<Book> {
+    try {
+      return await this.prismaService.book.update({
+        where: { id: bookId },
+        data: {
+          users: {
+            create: {
+              user: {
+                connect: { id: userId },
+              },
+            },
+          },
+        } as Prisma.BookUpdateInput, // Add type assertion here
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new BadRequestException("Book or user don't exist");
+      }
+      throw error;
+    }
   }
 }
